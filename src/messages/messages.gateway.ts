@@ -14,16 +14,18 @@ export class MessagesGateway {
   server: Server;
   constructor(private readonly messagesService: MessagesService) {}
 
-  @SubscribeMessage('message')
+  @SubscribeMessage('sendMessage')
   async create(@MessageBody() createMessageDto: CreateMessageDto) {
-    const message = await this.messagesService.create(createMessageDto);
-    this.server.emit('message', message);
-    return message;
+    const createdMessage = await this.messagesService.create(createMessageDto);
+    this.server.emit('receiveMessage', createdMessage);
+    return createdMessage;
   }
 
-  @SubscribeMessage('message')
-  findAll() {
-    return this.messagesService.findAll();
+  @SubscribeMessage('getAllMessages')
+  async findAll(client: any): Promise<void> {
+    const result = await this.messagesService.findAll();
+    client.emit('allMessages', result);
+    // return result;
   }
 
   @SubscribeMessage('join')
